@@ -1,0 +1,24 @@
+body{
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+    background-color: #000;
+}
+
+#canvas{
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    aspect-ratio: 16/9;    
+
+    image-rendering: pixelated;
+
+    background-color: aqua;
+}
+
+.sprites{
+    display: none;
+}

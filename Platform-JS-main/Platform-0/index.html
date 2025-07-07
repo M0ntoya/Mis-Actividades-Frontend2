@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ======================================================================
+     index.html
+     Punto de arranque del proyecto “Platform-JS”.
+     Define:
+       • <canvas> principal donde se dibuja el juego.
+       • <section class="sprites"> para precargar recursos (imágenes) y
+         mantenerlos en caché antes de que el motor los requiera.
+       • Importa main.js como módulo ES 6 (type="module") para habilitar
+         import/export y evitar la contaminación global.
+     ====================================================================== -->
+<head>
+    <meta charset="UTF-8">
+    <!-- Garantiza correcta escala en móviles y evita “zoom” automático. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Hoja de estilos global (fuentes, centrado del canvas, reset, etc.). -->
+    <link rel="stylesheet" href="CSS/style.css">
+
+    <title>Platform-JS</title>
+</head>
+
+<body>
+    <!-- ******************************************************************
+         Canvas de renderizado
+         ------------------------------------------------------------------
+         • width / height definen la resolución lógica; el CSS puede escalar.
+         • El contexto 2D se obtiene en JS   →  canvas.getContext("2d")
+         ****************************************************************** -->
+    <canvas id="canvas" width="640" height="360"></canvas>
+
+    <!-- ******************************************************************
+         Preload de sprites y mapas
+         ------------------------------------------------------------------
+         Las etiquetas <img> se mantienen fuera de pantalla pero en el DOM;
+         al cargarse, el navegador las guarda en caché y el drawImage() será
+         inmediato en juego.  Cada imagen recibe un ID único para referirla
+         rápidamente con document.getElementById().
+         Notas:
+           • Usa formatos ligeros (webp/png) para tiempos de carga menores.
+           • Mantener orden lógico (Walking, Idle, Crouch, Jump, Fall, Maps)
+             ayuda a localizar sprites durante el debug.
+         ****************************************************************** -->
+    <section class="sprites">
+        <!-- Animaciones de caminar -->
+        <img src="Assets/Sprites/Walking_KG_DER.webp" id="caminarDerecha">
+        <img src="Assets/Sprites/Walking_KG_IZQ.webp" id="caminarIzquierda">
+
+        <!-- Animaciones idle -->
+        <img src="Assets/Sprites/Idle_KG_1.png"        id="paradoDerecha">
+        <img src="Assets/Sprites/Idle_KG_FLIP.png"     id="paradoIzquierda">
+
+        <!-- Animaciones agachado -->
+        <img src="Assets/Sprites/Crouching_Idle_KG_DER.webp" id="agachadoDerecha">
+        <img src="Assets/Sprites/Crouching_Idle_KG_IZQ.png"  id="agachadoIzquierda">
+
+        <!-- Animaciones de salto/caída -->
+        <img src="Assets/Sprites/Jump_KG_DER.png"  id="saltarDerecha">
+        <img src="Assets/Sprites/Jump_KG_IZQ.png"  id="saltarIzquierda">
+        <img src="Assets/Sprites/Fall_KG_DER.png"  id="caerDerecha">
+        <img src="Assets/Sprites/Fall_KG_IZQ.png"  id="caerIzquierda">
+
+        <!-- Mapas / fondos -->
+        <img src="Assets/Maps/map1.png" id="mapa1">
+    </section>
+
+    <!-- ******************************************************************
+         Entrada al código de juego
+         ------------------------------------------------------------------
+         Al usar "type=module":
+           • Se permiten importaciones relativas (./Clases/jugador.js, etc.).
+           • El script se ejecuta en “strict mode” automáticamente.
+           • Cada archivo JS tiene su propio scope, reduciendo colisiones.
+         ****************************************************************** -->
+    <script type="module" src="JS/main.js"></script>
+</body>
+</html>
