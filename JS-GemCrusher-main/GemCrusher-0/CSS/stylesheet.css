@@ -1,0 +1,118 @@
+body{
+    background-color: black;
+}
+#tablero {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 600px;
+    height: 600px;
+    
+    max-height: 85vh;
+    width: auto;
+
+    aspect-ratio: 1 / 1;
+}
+
+.gema {
+    width: 100%;
+    height: 100%;
+}
+
+.gema--red{
+    background-image: url(../assets/sprites/rojo.png);
+    background-size: cover;
+}
+
+.gema--purple{
+    background-image: url(../assets/sprites/morado.png);
+    background-size: cover;
+}
+
+.gema--yellow{
+    background-image: url(../assets/sprites/amarillo.png);
+    background-size: cover;
+}
+
+.gema--blue{
+    background-image: url(../assets/sprites/azul.png);
+    background-size: cover;
+}
+
+.gema--green{
+    background-image: url(../assets/sprites/verde.png);
+    background-size: cover;
+}
+
+.gema--orange{
+    background-image: url(../assets/sprites/naranja.png);
+    background-size: cover;
+}
+
+.seleccionada{
+    opacity: 0.5;
+}
+
+.gema--matada{
+    opacity: 0;
+}
+
+/* --------------------------------------------------------------
+ *  ANIMACIONES DEL TABLERO “MATCH-3”
+ *  -------------------------------------------------------------
+ *  pop-out  → Se dispara en las gemas marcadas como “matadas”
+ *              para dar un efecto de explosión / desaparición.
+ *  drop     → Se aplica a las gemas que caen para rellenar
+ *              huecos; la distancia depende de la var CSS --pasos
+ *              que el código JS inyecta dinámicamente.
+ *----------------------------------------------------------------*/
+
+/* Gemas que “explotan” al desaparecer ──────────────────────────
+ * keyframes pop-out:
+ *   0%   → Escala y opacidad normal
+ *   80%  → Escala reducida al 30 %, opacidad al 50 % (efecto shrink)
+ *   100% → Desaparece completamente (escala 0, opacidad 0)
+ *
+ * Duración:      .18 s
+ * Timing-func.:  ease-out  (rápido al principio, suave al final)
+ * Propiedad:     forwards   → conserva el estado final (escala 0)
+ */
+@keyframes pop-out {
+  0%   { transform: scale(1);   opacity: 1; }
+  80%  { transform: scale(0.3); opacity: .5; }
+  100% { transform: scale(0);   opacity: 0; }
+}
+
+/* Clase de estado aplicada desde JS cuando la celda lógica
+ * contiene “gema--matada”.  Solo necesita añadirse; al terminar
+ * la animación, el <div> queda invisible pero sigue ocupando su
+ * lugar en la grid hasta que vuelvas a actualizar el tablero. */
+.gema--matada {
+  animation: pop-out .18s ease-out forwards;
+}
+
+/* Gemas que caen ───────────────────────────────────────────────
+ * keyframes drop:
+ *   from → translateY NEGATIVO en múltiplos de su propio alto
+ *           (unidades de 100 % de la gema) multiplicado por
+ *           --pasos (entero ≥ 1).   Ej.: 2 huecos → -200 %.
+ *   to   → vuelve a 0 (posición final en la grid)
+ *
+ * La distancia se calcula con `calc(var(--pasos) * -100%)`,
+ * lo que lo hace resolutivo y *responsive*; no hay números
+ * de píxeles fijos.
+ */
+@keyframes drop {
+  from { transform: translateY(calc(var(--pasos) * -100%)); }
+  to   { transform: translateY(0); }
+}
+
+/* Clase temporal que el JS añade a cada gema desplazada:
+ *   – Duración .20 s (ligeramente más larga que pop-out).
+ *   – forwards mantiene la gema en su lugar al terminar.
+ *   – will-change: transform avisa al navegador para que
+ *     optimice la animación (acelera con composición GPU). */
+.gema--cae {
+  animation: drop .20s ease-out forwards;
+  will-change: transform;
+}
