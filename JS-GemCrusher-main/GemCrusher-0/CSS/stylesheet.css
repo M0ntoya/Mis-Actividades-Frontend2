@@ -13,6 +13,12 @@ body{
 
     aspect-ratio: 1 / 1;
 }
+h1{
+    color: whitesmoke;
+}
+#puntos{
+    color: whitesmoke;
+}
 
 .gema {
     width: 100%;

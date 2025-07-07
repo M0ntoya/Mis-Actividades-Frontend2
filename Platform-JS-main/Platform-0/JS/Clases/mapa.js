@@ -1,53 +1,54 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Mapa.js
 // Clase responsable de representar y gestionar el escenario de fondo.
-// Contiene referencias a la textura, dimensiones lógicas del juego y al
-// jugador (para saber cuándo desplazar el fondo).
-// ─────────────────────────────────────────────────────────────────────────────
+// Realiza desplazamiento infinito lateral automático de la imagen de fondo.
+// 
 export default class Mapa {
     /**
      * @param {number} anchoJuego  Anchura lógica del canvas
      * @param {number} altoJuego   Altura lógica del canvas
-     * @param {Jugador} jugador    Instancia del jugador (para consultas)
+     * @param {Jugador} jugador    Instancia del jugador (no usada en scroll automático)
      */
     constructor(anchoJuego, altoJuego, jugador) {
-        // Dimensiones visibles de la “ventana” de juego.
         this.anchoJuego = anchoJuego;
-        this.altoJuego  = altoJuego;
-
-        // Referencia al jugador para calcular el desplazamiento relativo.
+        this.altoJuego = altoJuego;
         this.jugador = jugador;
 
-        // Imagen del mapa precargada en el HTML (<img id="mapa1">)
         this.fondo = document.getElementById("mapa1");
 
-        // Desplazamiento actual del mapa (origen del drawImage).
-        this.x = 0;  // Offset horizontal
-        this.y = 0;  // Offset vertical (no se usa en este ejemplo)
+        // Offset horizontal del fondo
+        this.x = 0;
+
+        // Velocidad del scroll
+        this.velocidadScroll = 2;
     }
 
     /**
      * update()
-     * ---------------------------------------------------------------------
-     * Método que el loop de juego llamará cada fotograma.
-     * Aquí deben implementar la lógica de scroll infinito del mapa.
+     * Mueve el fondo automáticamente hacia la izquierda de forma infinita.
      */
-    update() {
-        // ← Implementar lógica de desplazamiento aquí →
+    update(dt) {
+        const fondoAncho = this.fondo.width;
+
+        // Mover fondo en sentido opuesto a velocidad del jugador
+        this.x -= this.jugador.velocidad * dt;
+
+        // Loop infinito: ajustar x para que no se salga del rango
+        if (this.x <= -fondoAncho) {
+            this.x += fondoAncho;
+        } else if (this.x >= 0) {
+            this.x -= fondoAncho;
+        }
     }
-    
+
     /**
      * draw(ctx)
-     * ---------------------------------------------------------------------
-     * Dibuja el fondo en las coordenadas actuales.
-     * @param {CanvasRenderingContext2D} ctx Contexto de render 2D del canvas
+     * Dibuja dos copias del fondo para lograr efecto continuo.
      */
     draw(ctx) {
-        ctx.drawImage(
-            this.fondo,          // Fuente
-            this.x, this.y,      // Posición de la imagen en la pantalla
-            this.anchoJuego,     // Escala al ancho de la ventana de juego
-            this.altoJuego       // Escala a la altura de la ventana de juego
-        );
+        const fondoAncho = this.fondo.width;
+
+        ctx.drawImage(this.fondo, this.x, 0, fondoAncho, this.altoJuego);
+        ctx.drawImage(this.fondo, this.x + fondoAncho, 0, fondoAncho, this.altoJuego);
     }
 }

@@ -1,3 +1,11 @@
+
+// ======================= MODIFICACIONES APLICADAS ===========================
+// - Se añadió puntaje (+10 por gema eliminada), visualizado en #puntos
+// - Si un combo es >= 4 en horizontal, elimina toda la FILA
+// - Si un combo es >= 4 en vertical, elimina toda la COLUMNA
+// - Se añadió botón "Reiniciar partida" que reinicia todo el juego
+// ===========================================================================
+
 /*───────────────────────────────  Configuración básica  ───────────────────────────────*/
 
 // Importamos la clase Gema que define la “vista-modelo” de cada celda del tablero
@@ -22,6 +30,20 @@ const colores = [
 ];
 
 /*───────────────────────────────  Estado del juego  ───────────────────────────────*/
+
+// Elementos adicionales para puntaje y reinicio
+const puntajeDiv = document.getElementById("puntos");
+const btnReiniciar = document.getElementById("reiniciar");
+let puntaje = 0;
+
+// Mostrar puntaje en pantalla
+function actualizarPuntaje() {
+    puntajeDiv.textContent = `Puntos: ${puntaje}`;
+}
+
+// Reiniciar juego completo (misma lógica que el setup inicial)
+btnReiniciar.addEventListener("click", () => location.reload());
+
 
 // Matriz lógica [fila][columna] que guarda SOLO el color de cada gema
 // (mantiene la “verdad” del juego; el DOM se actualiza en función de esta)
@@ -240,7 +262,26 @@ function buscarCombos() {
     let combos = [];                 // ← se irán acumulando aquí
 
     // 1. Explorar filas   (izq→der)
-    busquedaHorizontal(combos);
+    
+    // Buscar horizontales y marcar filas enteras si combo >= 4
+    const filasAEliminar = new Set();
+    const columnasAEliminar = new Set();
+
+    busquedaHorizontal(combos, filasAEliminar);
+    busquedaVertical(combos, columnasAEliminar);
+
+    filasAEliminar.forEach(fila => {
+        for (let j = 0; j < COLUMNAS; j++) {
+            combos.push([fila, j]);
+        }
+    });
+
+    columnasAEliminar.forEach(col => {
+        for (let i = 0; i < FILAS; i++) {
+            combos.push([i, col]);
+        }
+    });
+        
 
     // 2. Explorar columnas (arriba→abajo)
     busquedaVertical(combos);
@@ -248,7 +289,7 @@ function buscarCombos() {
     // 3. Quitar duplicados: serializamos cada par con JSON.stringify,
     //    aplicamos un Set, y luego deserializamos.
     const unicos = [...new Set(combos.map(JSON.stringify))].map(JSON.parse);
-    return unicos;
+    return [...new Set(combos.map(JSON.stringify))].map(JSON.parse);
 }
 
 /****************************************************************************************
@@ -257,7 +298,7 @@ function buscarCombos() {
  * Detecta cadenas verticales de 3 o más gemas iguales y añade sus coordenadas
  * al arreglo `combos` recibido por referencia.
  ****************************************************************************************/
-function busquedaVertical(combos) {
+function busquedaVertical(combos, columnasAEliminar = new Set()) {
     // Recorremos cada COLUMNA por separado
     for (let j = 0; j < COLUMNAS; j++) {
 
@@ -305,7 +346,7 @@ function busquedaVertical(combos) {
  * Detecta cadenas horizontales de 3 o más gemas iguales y añade sus coordenadas
  * al arreglo `combos` recibido por referencia.
  ****************************************************************************************/
-function busquedaHorizontal(combos) {
+function busquedaHorizontal(combos, filasAEliminar = new Set()) {
     // Recorremos cada FILA por separado
     for (let i = 0; i < FILAS; i++) {
 
@@ -373,12 +414,16 @@ function borrarCombos() {
         const columna = combo[1];   // Índice de columna en la matriz lógica
 
         // ❷ Marcar la celda como eliminada en la lógica del juego
-        tableroLogico[fila][columna] = "gema--matada";
+        if (tableroLogico[fila][columna] !== "gema--matada") {
+            tableroLogico[fila][columna] = "gema--matada";
+            puntaje += 10;
+        }
         //       ↑ Esta cadena especial servirá para que 'actualizarTablero'
         //         aplique la clase CSS correspondiente y/o lance la animación
     });
 
     // ❸ Reflejar visualmente los cambios en el tablero
+    actualizarPuntaje();
     actualizarTablero();
 }
 
@@ -557,6 +602,7 @@ function bajarGemas() {
 
     /* ❹ La matriz lógica ya está lista, ahora actualizamos el DOM.
      *     Aquí es donde las .gema reciben sus nuevas grid-row/col. */
+    actualizarPuntaje();
     actualizarTablero();
 
     /* ❺ Se dispara la animación “drop” en cada gema desplazada.
